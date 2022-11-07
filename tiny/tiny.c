@@ -175,10 +175,14 @@ void serve_static(int fd, char *filename, int filesize)
 
   /* Send response body to client */
   srcfd = Open(filename, O_RDONLY, 0); // 파일을 오픈하고 식별자를 받아옴 
-  srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0); // mmap함수는 요청한 파일을 가상 메모리 영역으로 매핑
+  // srcp = Mmap(0, filesize, PROT_READ, MAP_PRIVATE, srcfd, 0); // mmap함수는 요청한 파일을 가상 메모리 영역으로 매핑
+  srcp = (char *)malloc(filesize);
+  Rio_readn(srcfd, srcp, filesize);
   Close(srcfd);
   Rio_writen(fd, srcp, filesize);
-  Munmap(srcp, filesize); // Mmap으로 가상메모리 영역에 매핑한 메모리 주소를 반환함
+  free(srcp);
+  // Munmap(srcp, filesize); // Mmap으로 가상메모리 영역에 매핑한 메모리 주소를 반환함
+
 }
 
 /*
