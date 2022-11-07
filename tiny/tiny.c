@@ -137,7 +137,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     strcpy(filename, ".");
     strcat(filename, uri);
     if (uri[strlen(uri)-1] == '/')
-      strcat(filename, "home.html");
+      strcat(filename, "adder.html");
     return 1;
   }
   else{ /* Dynamic content */
@@ -149,6 +149,7 @@ int parse_uri(char *uri, char *filename, char *cgiargs)
     else
       strcpy(cgiargs, "");
     strcpy(filename, ".");
+    printf("aa");
     strcat(filename, uri);
     return 0;
   }
