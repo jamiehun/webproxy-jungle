@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "queue.c"
 #include "sbuf.h"
-// #include "sbuf.c"
+
 #define NTHREADS 4
 #define SBUFSIZE 16
 
@@ -26,7 +26,6 @@ void *thread(void *vargp);
 char dest[MAXLINE];
 Queue queue; // 큐에 대한 구조체 설정
 sbuf_t sbuf;
-// sbuf_t *s;
 sem_t mutex;
 
 
@@ -63,8 +62,9 @@ int main(int argc, char **argv)
   while (1) {
     clientlen = sizeof(clientaddr);
     connfdp = Accept(listenfd, (SA *)&clientaddr, &clientlen); // 요청받은만큼 연결식별자 만들기
-
-    sbuf_insert(&sbuf, connfdp); /* Insert connfd in buffer */
+    
+    /* Insert connfd in buffer */
+    sbuf_insert(&sbuf, connfdp); 
   }
 
 }
@@ -105,16 +105,14 @@ void doit(int fd)
   printf("%s", buf);
   sscanf(buf, "%s %s %s", method, uri, version);
 
-  
+  /* p, v 연산으로 cache에 대한 다중 접근 잠그기 */
   P(&mutex);
   Node *cache = queue.front;
   while (cache != NULL){
     
     if(strcmp(cache->request_line, uri) == 0){
       // --------------------cache hit!!
-      printf("before %s\n", (cache->request_line));
       Rio_writen(fd, cache->response, strlen(cache->response));
-      printf("after %s\n", (cache->request_line));
       return;
     }
     cache = cache->next;
@@ -161,6 +159,7 @@ void send_request(char *uri, int fd){
   Rio_writen(fd, proxy_res, MAX_OBJECT_SIZE);
   Close(clientfd);
 
+  // p, v 연산으로 queue에 대한 다중 접근 잠그기
   P(&mutex);
   if (queue.count > 10){
     Dequeue(&queue);
@@ -169,9 +168,6 @@ void send_request(char *uri, int fd){
 
   printf("%s\n", (proxy_res));
   Enqueue(&queue, uri, &proxy_res);
-  V(&mutex);
   // ----------------enqueue
-  
-
-
+  V(&mutex);
 }
