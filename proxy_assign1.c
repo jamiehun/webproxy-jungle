@@ -1,4 +1,4 @@
-/* 웹프록시서버 만들기 과제 3번 */
+/* 웹프록시서버 만들기 과제 1번 */
 
 #include <stdio.h>
 #include "queue.c"
